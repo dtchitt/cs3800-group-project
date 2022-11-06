@@ -39,6 +39,15 @@ public class TicTacToeClient {
     private Scanner in;
     private PrintWriter out;
 
+	public static void main(String[] args) throws Exception {
+		TicTacToeClient client = new TicTacToeClient();
+		client.frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		client.frame.setSize(320, 320);
+		client.frame.setVisible(true);
+		client.frame.setResizable(false);
+		client.play();
+	}
+
     public TicTacToeClient() throws Exception {
 
         socket = new Socket("localhost", 60100);
@@ -130,14 +139,5 @@ public class TicTacToeClient {
             label.setForeground(text == 'X' ? Color.BLUE : Color.RED);
             label.setText(text + "");
         }
-    }
-
-    public static void main(String[] args) throws Exception {
-        TicTacToeClient client = new TicTacToeClient();
-        client.frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        client.frame.setSize(320, 320);
-        client.frame.setVisible(true);
-        client.frame.setResizable(false);
-        client.play();
     }
 }

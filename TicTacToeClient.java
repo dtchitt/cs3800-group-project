@@ -18,7 +18,7 @@ import javax.swing.JPanel;
 
 /**
  * A client for a multi-player tic tac toe game. Loosely based on an example in
- * Deitel and Deitel’s “Java How to Program” book. For this project I created a
+ * Deitel and Deitelï¿½s ï¿½Java How to Programï¿½ book. For this project I created a
  * new application-level protocol called TTTP (for Tic Tac Toe Protocol), which
  * is entirely plain text. The messages of TTTP are:
  *
@@ -30,7 +30,9 @@ import javax.swing.JPanel;
 public class TicTacToeClient {
 
     private JFrame frame = new JFrame("Tic Tac Toe");
-    private JLabel messageLabel = new JLabel("...");
+    private JLabel messageLabel = new JLabel("Waiting for Opponent to Move");
+    private JLabel textfield = new JLabel();
+    private JPanel title_panel = new JPanel();
 
     private Square[] board = new Square[9];
     private Square currentSquare;
@@ -42,10 +44,10 @@ public class TicTacToeClient {
 	public static void main(String[] args) throws Exception {
 		TicTacToeClient client = new TicTacToeClient();
 		client.frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		client.frame.setSize(320, 320);
-		client.frame.setVisible(true);
-		client.frame.setResizable(false);
-		client.play();
+        client.frame.setSize(800, 800);
+        client.frame.setVisible(true);
+        client.frame.setResizable(false);
+        client.play();
 	}
 
     public TicTacToeClient() throws Exception {
@@ -55,10 +57,20 @@ public class TicTacToeClient {
         out = new PrintWriter(socket.getOutputStream(), true);
 
         messageLabel.setBackground(Color.lightGray);
+        textfield.setBackground(new Color(0,0,0));
+		textfield.setForeground(new Color(0,255,255));
+		textfield.setFont(new Font("Cooper Black",Font.BOLD,75));
+		textfield.setHorizontalAlignment(JLabel.CENTER);
+		textfield.setText("Tic Tac Toe");
+		textfield.setOpaque(true);
+        title_panel.setLayout(new BorderLayout());
+		title_panel.setBounds(0,0,800,100);
+        title_panel.add(textfield);
         frame.getContentPane().add(messageLabel, BorderLayout.SOUTH);
+        frame.add(title_panel,BorderLayout.NORTH);
 
         var boardPanel = new JPanel();
-        boardPanel.setBackground(Color.black);
+        boardPanel.setBackground(new Color(0,0,0));
         boardPanel.setLayout(new GridLayout(3, 3, 2, 2));
         for (var i = 0; i < board.length; i++) {
             final int j = i;
@@ -137,12 +149,12 @@ public class TicTacToeClient {
         public Square() {
             setBackground(Color.white);
             setLayout(new GridBagLayout());
-            label.setFont(new Font("Arial", Font.BOLD, 40));
+            label.setFont(new Font("Latha", Font.BOLD, 100));
             add(label);
         }
 
         public void setText(char text) {
-            label.setForeground(text == 'X' ? Color.BLUE : Color.RED);
+            label.setForeground(text == 'X' ? Color.BLUE : Color.PINK);
             label.setText(text + "");
         }
         public void clearText() {

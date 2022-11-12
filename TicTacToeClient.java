@@ -1,4 +1,4 @@
-
+package project;
 
 import java.awt.Font;
 import java.awt.Color;
@@ -18,7 +18,7 @@ import javax.swing.JPanel;
 
 /**
  * A client for a multi-player tic tac toe game. Loosely based on an example in
- * Deitel and Deitel‚Äôs ‚ÄúJava How to Program‚Äù book. For this project I created a
+ * Deitel and Deitelís ìJava How to Programî book. For this project I created a
  * new application-level protocol called TTTP (for Tic Tac Toe Protocol), which
  * is entirely plain text. The messages of TTTP are:
  *
@@ -50,7 +50,7 @@ public class TicTacToeClient {
 
     public TicTacToeClient() throws Exception {
 
-        socket = new Socket("localhost", 60100);
+        socket = new Socket("localhost", 60111);
         in = new Scanner(socket.getInputStream());
         out = new PrintWriter(socket.getOutputStream(), true);
 
@@ -104,16 +104,22 @@ public class TicTacToeClient {
                     messageLabel.setText(response.substring(8));
                 } else if (response.startsWith("VICTORY")) {
                     JOptionPane.showMessageDialog(frame, "Winner Winner");
-                    break;
+                    //break;
                 } else if (response.startsWith("DEFEAT")) {
                     JOptionPane.showMessageDialog(frame, "Sorry you lost");
-                    break;
+                    //break;
                 } else if (response.startsWith("TIE")) {
                     JOptionPane.showMessageDialog(frame, "Tie");
-                    break;
+                    //break;
                 } else if (response.startsWith("OTHER_PLAYER_LEFT")) {
                     JOptionPane.showMessageDialog(frame, "Other player left");
                     break;
+                } else if (response.startsWith("PLAY_AGAIN")) {
+                    JOptionPane.showMessageDialog(frame, "Play Again");
+                    for (var i = 0; i < board.length; i++) {
+                    	board[i].clearText();
+                    	System.out.print("Clearing board");
+                    }
                 }
             }
             out.println("QUIT");
@@ -138,6 +144,10 @@ public class TicTacToeClient {
         public void setText(char text) {
             label.setForeground(text == 'X' ? Color.BLUE : Color.RED);
             label.setText(text + "");
+        }
+        public void clearText() {
+        	label.setForeground(null);
+            label.setText(null);
         }
     }
 }

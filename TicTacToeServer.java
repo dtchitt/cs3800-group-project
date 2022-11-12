@@ -1,3 +1,5 @@
+package project;
+
 
 
 import java.io.IOException;
@@ -10,7 +12,7 @@ import java.util.concurrent.Executors;
 
 /**
  * A server for a multi-player tic tac toe game. Loosely based on an example in
- * Deitel and Deitel‚Äôs ‚ÄúJava How to Program‚Äù book. For this project I created a
+ * Deitel and Deitelís ìJava How to Programî book. For this project I created a
  * new application-level protocol called TTTP (for Tic Tac Toe Protocol), which
  * is entirely plain text. The messages of TTTP are:
  *
@@ -22,7 +24,7 @@ import java.util.concurrent.Executors;
 public class TicTacToeServer {
 
     public static void main(String[] args) throws Exception {
-        try (var listener = new ServerSocket(60100)) {
+        try (var listener = new ServerSocket(60111)) {
             System.out.println("Tic Tac Toe Server is Running...");
             var pool = Executors.newFixedThreadPool(200);
             while (true) {
@@ -124,7 +126,9 @@ class Game {
                     return;
                 } else if (command.startsWith("MOVE")) {
                     processMoveCommand(Integer.parseInt(command.substring(5)));
-                }
+                } //else if(command.startsWith("RESTART")){
+                	//clearBoard();
+                //}
             }
         }
 
@@ -136,9 +140,22 @@ class Game {
                 if (hasWinner()) {
                     output.println("VICTORY");
                     opponent.output.println("DEFEAT");
+                    
+                    output.println("PLAY_AGAIN");
+                    opponent.output.println("PLAY_AGAIN");
+                    for(int i = 0; i < board.length; i++) {
+                    	board[i] = null;
+                    	System.out.println("Clearing the board");
+                    }
                 } else if (boardFilledUp()) {
                     output.println("TIE");
                     opponent.output.println("TIE");
+                    output.println("PLAY_AGAIN");
+                    opponent.output.println("PLAY_AGAIN");
+                    for(int i = 0; i < board.length; i++) {
+                    	board[i] = null;
+                    	System.out.println("Clearing the board");
+                    }
                 }
             } catch (IllegalStateException e) {
                 output.println("MESSAGE " + e.getMessage());

@@ -1,7 +1,3 @@
-package project;
-
-
-
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
@@ -12,7 +8,7 @@ import java.util.concurrent.Executors;
 
 /**
  * A server for a multi-player tic tac toe game. Loosely based on an example in
- * Deitel and Deitel’s “Java How to Program” book. For this project I created a
+ * Deitel and Deitelï¿½s ï¿½Java How to Programï¿½ book. For this project I created a
  * new application-level protocol called TTTP (for Tic Tac Toe Protocol), which
  * is entirely plain text. The messages of TTTP are:
  *
@@ -23,143 +19,227 @@ import java.util.concurrent.Executors;
  */
 public class TicTacToeServer {
 
-    public static void main(String[] args) throws Exception {
-        try (var listener = new ServerSocket(60111)) {
-            System.out.println("Tic Tac Toe Server is Running...");
-            var pool = Executors.newFixedThreadPool(200);
-            while (true) {
-                Game game = new Game();
-                pool.execute(game.new Player(listener.accept(), 'X'));
-                pool.execute(game.new Player(listener.accept(), 'O'));
-            }
-        }
-    }
+	public static void main(String[] args) throws Exception {
+		try (var listener = new ServerSocket(60111)) {
+			System.out.println("Tic Tac Toe Server is Running...");
+			var pool = Executors.newFixedThreadPool(200);
+			while (true) {
+				Game game = new Game();
+				pool.execute(game.new Player(listener.accept(), 'X'));
+				pool.execute(game.new Player(listener.accept(), 'O'));
+			}
+		}
+	}
 }
 
 class Game {
 
-    // Board cells numbered 0-8, top to bottom, left to right; null if empty
-    private Player[] board = new Player[9];
+	// Board cells numbered 0-8, top to bottom, left to right; null if empty
+	private Player[] board = new Player[9];
 
-    Player currentPlayer;
+	Player currentPlayer;
 
-    public boolean hasWinner() {
-        return (board[0] != null && board[0] == board[1] && board[0] == board[2])
-                || (board[3] != null && board[3] == board[4] && board[3] == board[5])
-                || (board[6] != null && board[6] == board[7] && board[6] == board[8])
-                || (board[0] != null && board[0] == board[3] && board[0] == board[6])
-                || (board[1] != null && board[1] == board[4] && board[1] == board[7])
-                || (board[2] != null && board[2] == board[5] && board[2] == board[8])
-                || (board[0] != null && board[0] == board[4] && board[0] == board[8])
-                || (board[2] != null && board[2] == board[4] && board[2] == board[6]);
-    }
+	/**
+	 * Checks for a winner
+	 * @return the winning player or null
+	 */
+	public Player hasWinner() {
+		Player winner = null;
 
-    public boolean boardFilledUp() {
-        return Arrays.stream(board).allMatch(p -> p != null);
-    }
+		int index = 0;
+		if (board[index] != null
+				&& (checkMatches(index, 1, 2) || checkMatches(index, 3, 6) || checkMatches(index, 4, 8))) {
+			winner = board[index];
+		}
 
-    public synchronized void move(int location, Player player) {
-        if (player != currentPlayer) {
-            throw new IllegalStateException("Not your turn");
-        } else if (player.opponent == null) {
-            throw new IllegalStateException("You don't have an opponent yet");
-        } else if (board[location] != null) {
-            throw new IllegalStateException("Cell already occupied");
-        }
-        board[location] = currentPlayer;
-        currentPlayer = currentPlayer.opponent;
-    }
+		index = 1;
+		if (board[index] != null && checkMatches(index, 3, 6)) {
+			winner = board[index];
+		}
 
-    /**
-     * A Player is identified by a character mark which is either 'X' or 'O'. For
-     * communication with the client the player has a socket and associated Scanner
-     * and PrintWriter.
-     */
-    class Player implements Runnable {
-        char mark;
-        Player opponent;
-        Socket socket;
-        Scanner input;
-        PrintWriter output;
+		index = 2;
+		if (board[index] != null && (checkMatches(index, 3, 6) || checkMatches(index, 2, 4))) {
+			winner = board[index];
+		}
 
-        public Player(Socket socket, char mark) {
-            this.socket = socket;
-            this.mark = mark;
-        }
+		index = 3;
+		if (board[index] != null && checkMatches(index, 1, 2)) {
+			winner = board[index];
+		}
 
-        @Override
-        public void run() {
-            try {
-                setup();
-                processCommands();
-            } catch (Exception e) {
-                e.printStackTrace();
-            } finally {
-                if (opponent != null && opponent.output != null) {
-                    opponent.output.println("OTHER_PLAYER_LEFT");
-                }
-                try {
-                    socket.close();
-                } catch (IOException e) {
-                }
-            }
-        }
+		index = 6;
+		if (board[index] != null && checkMatches(index, 1, 2)) {
+			winner = board[index];
+		}
 
-        private void setup() throws IOException {
-            input = new Scanner(socket.getInputStream());
-            output = new PrintWriter(socket.getOutputStream(), true);
-            output.println("WELCOME " + mark);
-            if (mark == 'X') {
-                currentPlayer = this;
-                output.println("MESSAGE Waiting for opponent to connect");
-            } else {
-                opponent = currentPlayer;
-                opponent.opponent = this;
-                opponent.output.println("MESSAGE Your move");
-            }
-        }
+		return winner;
+	}
 
-        private void processCommands() {
-            while (input.hasNextLine()) {
-                var command = input.nextLine();
-                if (command.startsWith("QUIT")) {
-                    return;
-                } else if (command.startsWith("MOVE")) {
-                    processMoveCommand(Integer.parseInt(command.substring(5)));
-                } //else if(command.startsWith("RESTART")){
-                	//clearBoard();
-                //}
-            }
-        }
+	/**
+	* check if the players match 3 winnng positions
+	* @param base the base index
+	* @param a base index + a will be checked
+	* @param b base index + b will be checked
+	* @return true if a player is winning with given indices
+	*/
+	private boolean checkMatches(int base, int a, int b) {
+		return (this.board[base] == this.board[base + a] && this.board[base] == this.board[base + b]);
+	}
 
-        private void processMoveCommand(int location) {
-            try {
-                move(location, this);
-                output.println("VALID_MOVE");
-                opponent.output.println("OPPONENT_MOVED " + location);
-                if (hasWinner()) {
-                    output.println("VICTORY");
-                    opponent.output.println("DEFEAT");
-                    
-                    output.println("PLAY_AGAIN");
-                    opponent.output.println("PLAY_AGAIN");
-                    for(int i = 0; i < board.length; i++) {
-                    	board[i] = null;
-                    	System.out.println("Clearing the board");
-                    }
-                } else if (boardFilledUp()) {
-                    output.println("TIE");
-                    opponent.output.println("TIE");
-                    output.println("PLAY_AGAIN");
-                    opponent.output.println("PLAY_AGAIN");
-                    for(int i = 0; i < board.length; i++) {
-                    	board[i] = null;
-                    	System.out.println("Clearing the board");
-                    }
-                }
-            } catch (IllegalStateException e) {
-                output.println("MESSAGE " + e.getMessage());
-            }
-        }
-    }
+	public boolean isBoardFull() {
+		return Arrays.stream(board).allMatch(p -> p != null);
+	}
+
+	public synchronized void move(int location, Player player) {
+		if (player != currentPlayer) {
+			throw new IllegalStateException("Not your turn");
+		} else if (player.opponent == null) {
+			throw new IllegalStateException("You don't have an opponent yet");
+		} else if (board[location] != null) {
+			throw new IllegalStateException("Cell already occupied");
+		}
+		board[location] = currentPlayer;
+		currentPlayer = currentPlayer.opponent;
+	}
+
+	public void resetBoard() {
+		for(int i = 0; i < board.length; i++) {
+			board[i] = null;
+			System.out.println("Clearing the board");
+		}
+	}
+
+	/**
+	 * A Player is identified by a character mark which is either 'X' or 'O'. For
+	 * communication with the client the player has a socket and associated Scanner
+	 * and PrintWriter.
+	 */
+	class Player implements Runnable {
+		char mark;
+		Player opponent;
+		Socket socket;
+		Scanner input;
+		PrintWriter output;
+		int wins = 0;
+		int loses = 0;
+
+		public Player(Socket socket, char mark) {
+			this.socket = socket;
+			this.mark = mark;
+		}
+
+		@Override
+		public void run() {
+			try {
+				setup();
+				processCommands();
+			} catch (Exception e) {
+				e.printStackTrace();
+			} finally {
+				if (opponent != null && opponent.output != null) {
+					opponent.output.println("OTHER_PLAYER_LEFT");
+				}
+				try {
+					socket.close();
+				} catch (IOException e) {
+				}
+			}
+		}
+
+		private void setup() throws IOException {
+			input = new Scanner(socket.getInputStream());
+			output = new PrintWriter(socket.getOutputStream(), true);
+			output.println("WELCOME " + mark);
+			if (mark == 'X') {
+				currentPlayer = this;
+				output.println("MESSAGE Waiting for opponent to connect");
+			} else {
+				opponent = currentPlayer;
+				opponent.opponent = this;
+				opponent.output.println("MESSAGE Your move");
+			}
+		}
+
+		private void processCommands() {
+			while (input.hasNextLine()) {
+				var command = input.nextLine();
+				if (command.startsWith("QUIT")) {
+					return;
+				} else if (command.startsWith("MOVE")) {
+					processMoveCommand(Integer.parseInt(command.substring(5)));
+				}
+			}
+		}
+
+		private void processMoveCommand(int location) {
+			try {
+				move(location, this);
+				output.println("VALID_MOVE");
+				opponent.output.println("OPPONENT_MOVED " + location);
+
+				Player winner = hasWinner();
+
+				if (winner == this) {
+					this.wins++;
+					output.println("VICTORY-" + this.wins + "-" + this.loses);
+					opponent.loses++;
+					opponent.output.println("DEFEAT-" + opponent.wins + "-" + opponent.loses);
+				}
+
+				if (winner == opponent) {
+					opponent.wins++;
+					opponent.output.println("VICTORY-" + opponent.wins + "-" + opponent.loses);
+					this.loses++;
+					this.output.println("DEFEAT-" + this.wins + "-" + this.loses);
+				}
+
+				if (isBoardFull()) {
+					this.output.println("TIE");
+					opponent.output.println("TIE");
+					resetBoard();
+				}
+
+				if (winner != null) {
+					this.output.println("PLAY_AGAIN");
+					opponent.output.println("PLAY_AGAIN");
+					resetBoard();
+				}
+
+			} catch (IllegalStateException e) {
+				this.output.println("MESSAGE " + e.getMessage());
+			}
+		}
+
+		/**
+		* set the number of wins a player has
+		* @param wins the wins of a player
+		*/
+		public void setWins(int wins) {
+			this.wins = wins;
+		}
+
+		/**
+		 * get the number of wins a player has 
+		 * @return the wins of a player
+		 */
+		public int getWins() {
+			return wins;
+		}
+
+		/**
+		 * set the number of loses a player has
+		 * @param loses the loses of a player
+		 */
+		public void setLoses(int loses) {
+			this.loses = loses;
+		}
+
+		/**
+		 * get the number of loses a player has 
+		 * @return the loses of a player
+		 */
+		public int getLoses() {
+			return loses;
+		}
+	}
 }

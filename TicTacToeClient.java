@@ -1,5 +1,3 @@
-package project;
-
 import java.awt.Font;
 import java.awt.Color;
 import java.awt.GridLayout;
@@ -31,6 +29,8 @@ public class TicTacToeClient {
 
     private JFrame frame = new JFrame("Tic Tac Toe");
     private JLabel messageLabel = new JLabel("Waiting for Opponent to Move");
+	private JLabel scoreLabel = new JLabel("| Wins: 0 - Loses: 0");
+	private JPanel bottom = new JPanel();
     private JLabel textfield = new JLabel();
     private JPanel title_panel = new JPanel();
 
@@ -57,6 +57,10 @@ public class TicTacToeClient {
         out = new PrintWriter(socket.getOutputStream(), true);
 
         messageLabel.setBackground(Color.lightGray);
+		scoreLabel.setBackground(Color.lightGray);
+		bottom.setBackground(Color.lightGray);
+		bottom.add(messageLabel);
+		bottom.add(scoreLabel);
         textfield.setBackground(new Color(0,0,0));
 		textfield.setForeground(new Color(0,255,255));
 		textfield.setFont(new Font("Cooper Black",Font.BOLD,75));
@@ -66,7 +70,7 @@ public class TicTacToeClient {
         title_panel.setLayout(new BorderLayout());
 		title_panel.setBounds(0,0,800,100);
         title_panel.add(textfield);
-        frame.getContentPane().add(messageLabel, BorderLayout.SOUTH);
+        frame.getContentPane().add(bottom, BorderLayout.SOUTH);
         frame.add(title_panel,BorderLayout.NORTH);
 
         var boardPanel = new JPanel();
@@ -115,9 +119,17 @@ public class TicTacToeClient {
                 } else if (response.startsWith("MESSAGE")) {
                     messageLabel.setText(response.substring(8));
                 } else if (response.startsWith("VICTORY")) {
+
+					String wins = response.split("-")[1];
+					System.out.println("wins" + wins);
+					String loses = response.split("-")[2];
+					System.out.println("loses" + loses);
+					
+					this.scoreLabel.setText("| Wins: " + wins + " - Loses: " + loses);
                     JOptionPane.showMessageDialog(frame, "Winner Winner");
                     //break;
                 } else if (response.startsWith("DEFEAT")) {
+					this.scoreLabel.setText("| Wins: " + response.split("-")[1] + " - Loses: " + response.split("-")[2]);
                     JOptionPane.showMessageDialog(frame, "Sorry you lost");
                     //break;
                 } else if (response.startsWith("TIE")) {

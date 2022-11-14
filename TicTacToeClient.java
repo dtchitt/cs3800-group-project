@@ -127,23 +127,21 @@ public class TicTacToeClient {
 					
 					this.scoreLabel.setText("| Wins: " + wins + " - Loses: " + loses);
                     JOptionPane.showMessageDialog(frame, "Winner Winner");
-                    //break;
+
                 } else if (response.startsWith("DEFEAT")) {
 					this.scoreLabel.setText("| Wins: " + response.split("-")[1] + " - Loses: " + response.split("-")[2]);
                     JOptionPane.showMessageDialog(frame, "Sorry you lost");
-                    //break;
+
                 } else if (response.startsWith("TIE")) {
                     JOptionPane.showMessageDialog(frame, "Tie");
-                    //break;
+					this.resetBoard();
+
                 } else if (response.startsWith("OTHER_PLAYER_LEFT")) {
                     JOptionPane.showMessageDialog(frame, "Other player left");
                     break;
                 } else if (response.startsWith("PLAY_AGAIN")) {
                     JOptionPane.showMessageDialog(frame, "Play Again");
-                    for (var i = 0; i < board.length; i++) {
-                    	board[i].clearText();
-                    	System.out.print("Clearing board");
-                    }
+					this.resetBoard();
                 }
             }
             out.println("QUIT");
@@ -154,6 +152,14 @@ public class TicTacToeClient {
             frame.dispose();
         }
     }
+
+	private void resetBoard() {
+		System.out.println("Clearing board");
+		for (var i = 0; i < board.length; i++) {
+			board[i].clearText();
+		}
+		System.out.println("Board cleared");
+	}
 
     static class Square extends JPanel {
         JLabel label = new JLabel();

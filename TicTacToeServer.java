@@ -193,7 +193,7 @@ class Game {
 					this.output.println("DEFEAT-" + this.wins + "-" + this.loses);
 				}
 
-				if (isBoardFull()) {
+				if (isBoardFull() && winner == null) {
 					this.output.println("TIE");
 					opponent.output.println("TIE");
 					resetBoard();

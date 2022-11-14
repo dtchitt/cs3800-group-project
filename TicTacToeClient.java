@@ -16,7 +16,7 @@ import javax.swing.JPanel;
 
 /**
  * A client for a multi-player tic tac toe game. Loosely based on an example in
- * Deitel and Deitel�s �Java How to Program� book. For this project I created a
+ * Deitel and Deitels Java How to Program book. For this project I created a
  * new application-level protocol called TTTP (for Tic Tac Toe Protocol), which
  * is entirely plain text. The messages of TTTP are:
  *
@@ -41,6 +41,11 @@ public class TicTacToeClient {
     private Scanner in;
     private PrintWriter out;
 
+	/**
+	 * This will allow you start the client program and show the UI
+	 * @param args
+	 * @throws Exception
+	 */
 	public static void main(String[] args) throws Exception {
 		TicTacToeClient client = new TicTacToeClient();
 		client.frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -50,6 +55,10 @@ public class TicTacToeClient {
         client.play();
 	}
 
+	/**
+	 * Create the UI and socket connection to server
+	 * @throws Exception
+	 */
     public TicTacToeClient() throws Exception {
 
         socket = new Socket("localhost", 60111);
@@ -153,6 +162,9 @@ public class TicTacToeClient {
         }
     }
 
+	/**
+	 * Reset the board held in client
+	 */
 	private void resetBoard() {
 		System.out.println("Clearing board");
 		for (var i = 0; i < board.length; i++) {
@@ -161,6 +173,9 @@ public class TicTacToeClient {
 		System.out.println("Board cleared");
 	}
 
+	/**
+	 * This class is used for the squares for the board
+	 */
     static class Square extends JPanel {
         JLabel label = new JLabel();
 

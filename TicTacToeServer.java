@@ -8,7 +8,7 @@ import java.util.concurrent.Executors;
 
 /**
  * A server for a multi-player tic tac toe game. Loosely based on an example in
- * Deitel and Deitel�s �Java How to Program� book. For this project I created a
+ * Deitel and Deitels Java How to Program book. For this project I created a
  * new application-level protocol called TTTP (for Tic Tac Toe Protocol), which
  * is entirely plain text. The messages of TTTP are:
  *
@@ -86,10 +86,20 @@ class Game {
 		return (this.board[base] == this.board[base + a] && this.board[base] == this.board[base + b]);
 	}
 
+	/**
+	 * Checks if the board is full
+	 * @return true if full
+	 */
 	public boolean isBoardFull() {
 		return Arrays.stream(board).allMatch(p -> p != null);
 	}
 
+	/**
+	 * Blocking function that determines what to do when a player tries to move
+	 * If it invalid it will handle it
+	 * @param location the loc clicked on the board
+	 * @param player the clicking player
+	 */
 	public synchronized void move(int location, Player player) {
 		if (player != currentPlayer) {
 			throw new IllegalStateException("Not your turn");
@@ -102,6 +112,9 @@ class Game {
 		currentPlayer = currentPlayer.opponent;
 	}
 
+	/**
+	 * resets the server board
+	 */
 	public void resetBoard() {
 		for(int i = 0; i < board.length; i++) {
 			board[i] = null;
@@ -128,6 +141,9 @@ class Game {
 			this.mark = mark;
 		}
 
+		/**
+		 * This function is ran when the player thread is started (it comes from the Runnable interface)
+		 */
 		@Override
 		public void run() {
 			try {
@@ -146,6 +162,10 @@ class Game {
 			}
 		}
 
+		/**
+		 * Set up the players in/out streams and send needed info
+		 * @throws IOException
+		 */
 		private void setup() throws IOException {
 			input = new Scanner(socket.getInputStream());
 			output = new PrintWriter(socket.getOutputStream(), true);
@@ -160,6 +180,9 @@ class Game {
 			}
 		}
 
+		/**
+		 * Processes the command from the input
+		 */
 		private void processCommands() {
 			while (input.hasNextLine()) {
 				var command = input.nextLine();
@@ -171,6 +194,10 @@ class Game {
 			}
 		}
 
+		/**
+		 * Handles player movement on board
+		 * @param location loc of place on board being manipulated
+		 */
 		private void processMoveCommand(int location) {
 			try {
 				move(location, this);
